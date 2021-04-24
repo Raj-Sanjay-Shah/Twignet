@@ -1,5 +1,6 @@
 ## Discussed Notes
-1. We have 7000 tweets which we split as train and test in most of the models. We have additional 2000 tweets which are untouched at the moment
+### Data
+We have 7000 tweets which we split as train and test in most of the models. We have additional 2000 tweets which are untouched at the moment
 ### Preprocessing
 1. Text GCN: 5000:2000, 79.4 
 	- 500: 6500, 71% 
