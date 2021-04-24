@@ -1,35 +1,35 @@
 ## Discussed Notes
-We have 7000 tweets which we split as train and test in most of the models. We have additional 2000 tweets which are untouched at the moment
-Preprocessing
-Text GCN: 5000:2000, 79.4 
-           500: 6500, 71% 
-Feature embeddings are obtained from tf-idf of the synonym set of words
-BERT: Base, train = 93% (3 epochs), test = 87%
-Embeddings from Text - GCN and BERT both, Multilayer Perceptron Test: 90%
-	This means that we took the embeddings for both the models of size 200 for GCN and 768 for BERT and concatenated them before feeding into MLP.
-Not done yet: Using BERT embeddings as GCN features because it is time intensive to generate bert embeddings for context free individual words.
-Text GCN is transductive
-(AXW) 7000*7000 7000 * feature_size * Feature_size * hidden_layer
-X'=(AXW)
-Fast GCN, which is inductive in nature
+1. We have 7000 tweets which we split as train and test in most of the models. We have additional 2000 tweets which are untouched at the moment
+### Preprocessing
+1. Text GCN: 5000:2000, 79.4 
+	- 500: 6500, 71% 
+2. Feature embeddings are obtained from tf-idf of the synonym set of words
+3. BERT: Base, train = 93% (3 epochs), test = 87%
+4. Embeddings from Text - GCN and BERT both, Multilayer Perceptron Test: 90%
+	- This means that we took the embeddings for both the models of size 200 for GCN and 768 for BERT and concatenated them before feeding into MLP.
+5. Not done yet: Using BERT embeddings as GCN features because it is time intensive to generate bert embeddings for context free individual words.
+6. Text GCN is transductive
+ - (AXW) 7000*7000 7000 * feature_size * Feature_size * hidden_layer
+ - X'=(AXW)
+ - Fast GCN, which is inductive in nature
 
 ## Requirements
 1. pip3 install -r requirements.txt
 2. download bert pre_trained models from [https://drive.google.com/drive/folders/1rZmeT5SCCLe7UH6SScXj7aaN_f8TD8gs?usp=sharing] and store into the folder '../BERT/'
-	_finetuned_BERT_epoch_1.model
-	_finetuned_BERT_epoch_2.model
-	_finetuned_BERT_epoch_3.model
+	- finetuned_BERT_epoch_1.model
+	- finetuned_BERT_epoch_2.model
+	- finetuned_BERT_epoch_3.model
 
 ## Steps to run the code:
 1. Install all the requirements in the file requirements.txt by using the above code.
 2. python run.py
 3. run.py has commands to run 6 python files:
-	_preprocess.py: file to change for any new data and preprocess the tweets.
-	_BERT_evaluate.py: file to generate BERT embeddings from a pre-trained and finetuned model.
-	_prepare_data.py: prepare data for graph convolutional neural networks.
-	_build_graph.py: build a text graph.
-	_gcn_train.py: train GCN and generate embeddings.
-	_mlp_twignet.py: run mlp on the concatenated and generated embeddings.
+	- preprocess.py: file to change for any new data and preprocess the tweets.
+	- BERT_evaluate.py: file to generate BERT embeddings from a pre-trained and finetuned model.
+	- prepare_data.py: prepare data for graph convolutional neural networks.
+	- build_graph.py: build a text graph.
+	- gcn_train.py: train GCN and generate embeddings.
+	- mlp_twignet.py: run mlp on the concatenated and generated embeddings.
 
 ## Code to be added:
 1. BERT_train.py: File to train BERT
