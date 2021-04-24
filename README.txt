@@ -16,6 +16,9 @@
 Requirements
 --pip3 install -r requirements.txt
 --download bert pre_trained models from https://drive.google.com/drive/folders/1rZmeT5SCCLe7UH6SScXj7aaN_f8TD8gs?usp=sharing and store into the folder '../BERT/'
+	finetuned_BERT_epoch_1.model
+	finetuned_BERT_epoch_2.model
+	finetuned_BERT_epoch_3.model
 --------------------------------------------
 Steps to run the code:
 --Install all the requirements in the file requirements.txt by using the above code.
