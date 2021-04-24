@@ -9,9 +9,9 @@
 	- This means that we took the embeddings for both the models of size 200 for GCN and 768 for BERT and concatenated them before feeding into MLP.
 5. Not done yet: Using BERT embeddings as GCN features because it is time intensive to generate bert embeddings for context free individual words.
 6. Text GCN is transductive
- - (AXW) 7000*7000 7000 * feature_size * Feature_size * hidden_layer
- - X'=(AXW)
- - Fast GCN, which is inductive in nature
+	- (AXW) 7000*7000 7000 * feature_size * Feature_size * hidden_layer
+	- X'=(AXW)
+	- Fast GCN, which is inductive in nature
 
 ## Requirements
 1. pip3 install -r requirements.txt
