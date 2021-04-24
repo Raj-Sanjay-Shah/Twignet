@@ -14,12 +14,13 @@
 -- Fast GCN, which is inductive nature
 --------------------------------------------
 Requirements
-pip3 install -r requirements.txt
+--pip3 install -r requirements.txt
+--download bert pre_trained models from https://drive.google.com/drive/folders/1rZmeT5SCCLe7UH6SScXj7aaN_f8TD8gs?usp=sharing and store into the folder '../BERT/'
 --------------------------------------------
 Steps to run the code:
 --Install all the requirements in the file requirements.txt by using the above code.
 --python run.py
-----run.py has commands to run 6 python files (All commented at the moment):
+----run.py has commands to run 6 python files:
 	1. preprocess.py: file to change for any new data and preprocess the tweets.
 	2. BERT_evaluate.py: file to generate BERT embeddings from a pre-trained and finetuned model.
 	3. prepare_data.py: prepare data for graph convolutional neural networks.
