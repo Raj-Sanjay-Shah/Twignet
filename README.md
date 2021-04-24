@@ -14,24 +14,24 @@ X'=(AXW)
 Fast GCN, which is inductive in nature
 
 ## Requirements
--pip3 install -r requirements.txt
--download bert pre_trained models from [https://drive.google.com/drive/folders/1rZmeT5SCCLe7UH6SScXj7aaN_f8TD8gs?usp=sharing] and store into the folder '../BERT/'
-	finetuned_BERT_epoch_1.model
-	finetuned_BERT_epoch_2.model
-	finetuned_BERT_epoch_3.model
+1. pip3 install -r requirements.txt
+2. download bert pre_trained models from [https://drive.google.com/drive/folders/1rZmeT5SCCLe7UH6SScXj7aaN_f8TD8gs?usp=sharing] and store into the folder '../BERT/'
+	_finetuned_BERT_epoch_1.model
+	_finetuned_BERT_epoch_2.model
+	_finetuned_BERT_epoch_3.model
 
 ## Steps to run the code:
--Install all the requirements in the file requirements.txt by using the above code.
--python run.py
--run.py has commands to run 6 python files:
-	1. preprocess.py: file to change for any new data and preprocess the tweets.
-	2. BERT_evaluate.py: file to generate BERT embeddings from a pre-trained and finetuned model.
-	3. prepare_data.py: prepare data for graph convolutional neural networks.
-	4. build_graph.py: build a text graph.
-	5. gcn_train.py: train GCN and generate embeddings.
-	6. mlp_twignet.py: run mlp on the concatenated and generated embeddings.
+1. Install all the requirements in the file requirements.txt by using the above code.
+2. python run.py
+3. run.py has commands to run 6 python files:
+	_preprocess.py: file to change for any new data and preprocess the tweets.
+	_BERT_evaluate.py: file to generate BERT embeddings from a pre-trained and finetuned model.
+	_prepare_data.py: prepare data for graph convolutional neural networks.
+	_build_graph.py: build a text graph.
+	_gcn_train.py: train GCN and generate embeddings.
+	_mlp_twignet.py: run mlp on the concatenated and generated embeddings.
 
 ## Code to be added:
-	1. BERT_train.py: File to train BERT
-	2. GCN_evaluate.py: Have a pre-generated adjacency and feature matrix for the train set in GCN and write code to use the additional actual data to enlarge the graph as needed without recreating the original graph for the nodes in the training set. 
+1. BERT_train.py: File to train BERT
+2. GCN_evaluate.py: Have a pre-generated adjacency and feature matrix for the train set in GCN and write code to use the additional actual data to enlarge the graph as needed without recreating the original graph for the nodes in the training set. 
 	
