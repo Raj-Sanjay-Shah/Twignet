@@ -5,6 +5,7 @@
 4. Remove shuffling in the build graph file
 5. Discuss about XAI techniques for BERT
 6. Minor Changes to code structure
+7. Exception Handling
 ### Notes - April 24
 #### Data
 We have 7000 tweets which we split as train and test in most of the models. We have additional 2000 tweets which are untouched at the moment
