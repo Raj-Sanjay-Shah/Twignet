@@ -1,5 +1,5 @@
 ### Notes and tasks - May 7
-1. Perform an experiment on time for build graph
+1. Perform an experiment on time for build graph: For 500 tweets, time to build graph = 26.051642417907715 seconds; For 600 tweets, time to build graph = 26.051642417907715 seconds 
 2. Add Papers to the file
 3. Make this repository private if possible
 4. Remove shuffling in the build graph file
