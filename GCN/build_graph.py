@@ -64,7 +64,8 @@ for train_name in doc_train_list:
     train_ids.append(train_id)
 # print(train_ids)
 
-random.shuffle(train_ids)
+# random.shuffle(train_ids)
+
 
 # partial labeled data
 #train_ids = train_ids[:int(0.2 * len(train_ids))]
@@ -79,7 +80,7 @@ for test_name in doc_test_list:
     test_id = doc_name_list.index(test_name)
     test_ids.append(test_id)
 # print(test_ids)
-random.shuffle(test_ids)
+# random.shuffle(test_ids)
 
 test_ids_str = '\n'.join(str(index) for index in test_ids)
 f = open('GCN/data/' + dataset + '.test.index', 'w')
