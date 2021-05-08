@@ -1,8 +1,10 @@
 ### Notes and tasks - May 7
 1. Perform an experiment on time for build graph
-2. Remove shuffling in the build graph file
-3. Discuss about XAI techniques for BERT
-4. Minor Changes to code structure
+2. Add Papers to the file
+3. Make this repository private if possible
+4. Remove shuffling in the build graph file
+5. Discuss about XAI techniques for BERT
+6. Minor Changes to code structure
 ### Notes - April 24
 #### Data
 We have 7000 tweets which we split as train and test in most of the models. We have additional 2000 tweets which are untouched at the moment
