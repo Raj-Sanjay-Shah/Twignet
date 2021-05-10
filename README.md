@@ -1,3 +1,11 @@
+### Tasks May 10
+1. Try new models like ALBERT
+2. Explainable BERT, DistilBERT
+3. BERT Tweet
+4. GCN experiment
+5. Activation Functions : SELU
+6. Loss Function: Hinge Loss, Normalised Log likelihood
+7. 
 ### Notes and tasks - May 7
 1. Perform an experiment on time for build graph: For 500 tweets, time to build graph = 26.051642417907715 seconds; For 600 tweets, time to build graph = 31.93747115135193 seconds, For 2000 tweets, time to build graph = 64.18152785301208 seconds
 2. Add Papers to the file
