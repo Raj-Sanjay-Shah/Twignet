@@ -1,3 +1,7 @@
+### Tasks May 14
+1. Identity Matrix vs Feature Matrix
+2. TF-IDF: Capture Importance of words in a tweet
+3. VGCN Paper
 ### Tasks May 10
 1. Try new models like ALBERT
 2. Explainable BERT, DistilBERT
