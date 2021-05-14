@@ -2,6 +2,8 @@
 1. Identity Matrix vs Feature Matrix
 2. Efficient Graph Creation from tweets instead of TF-IDF: Capture Importance of words in a tweet
 3. VGCN Paper
+4. Graph Encoders for embedding generation
+5. Write to WNUT paper authors
 ### Tasks May 10
 1. Try new models like ALBERT
 2. Explainable BERT, DistilBERT
