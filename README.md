@@ -4,6 +4,7 @@
 3. VGCN Paper
 4. Graph Encoders for embedding generation
 5. Write to WNUT paper authors
+6. BERT Tokenizer
 ### Tasks May 10
 1. Try new models like ALBERT
 2. Explainable BERT, DistilBERT
