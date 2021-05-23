@@ -9,9 +9,11 @@ This file is used to preprocess tweets in the following manner:
 --Stop word removal
 """
 #-----------------------------------------------------------------------------------------------
-raw_input_file = "train.tsv"
+raw_input_file1 = "train.tsv"
+raw_input_file2 = "valid.tsv"
+raw_input_file3 = "test.tsv"
 processed_input_file = "Data/preprocessed.tsv"
-ratio_of_train = 0.8
+ratio_of_train = 0.7
 #-----------------------------------------------------------------------------------------------
 import re
 import pandas as pd
@@ -21,7 +23,12 @@ import emoji
 import pickle
 import nltk
 from nltk.corpus import stopwords
-tweets = pd.read_csv(raw_input_file,sep='\t|\n',engine = 'python')
+from sklearn.utils import shuffle
+# df1 = pd.read_csv(raw_input_file1,sep='\t|\n',engine = 'python')
+# df2 = pd.read_csv(raw_input_file2,sep='\t|\n',engine = 'python')
+# df3 = pd.read_csv(raw_input_file3,sep='\t|\n',engine = 'python')
+# tweets = pd.DataFrame(np.concatenate([ df2.values, df3.values]), columns=df2.columns)
+tweets = pd.read_csv(raw_input_file3,sep='\t|\n',engine = 'python')
 tweets['text'].fillna("Empty Tweet", inplace = True)
 tweets['text'].apply(str)
 from nltk.corpus import wordnet as wn
@@ -32,7 +39,7 @@ cachedStopWords = stopwords.words("english")
 def rem_stop_words(text):
     text = ' '.join([word for word in text.split() if word not in cachedStopWords])
     return text
-    
+
 def decontracted(phrase):
     phrase = re.sub(r"won\'t", "will not", phrase)
     phrase = re.sub(r"can\'t", "can not", phrase)
@@ -45,12 +52,12 @@ def decontracted(phrase):
     phrase = re.sub(r"\'ve", " have", phrase)
     phrase = re.sub(r"\'m", " am", phrase)
     return phrase
-    
+
 def clean_str(string):
     string = string.strip().lower()
     string = rem_stop_words(string)
     string = decontracted(string)
-    
+
     string = re.sub(r"<p>", " ", string)
     string = re.sub(r"</p>", " ", string)
     string = re.sub(r"\n", " ", string)
@@ -86,9 +93,9 @@ def withoutduplicates(string):
 
 def preprocess_tweets(tweets):
     for row_number, tweet in tweets.iterrows():
-        twitt = clean_str(tweet['text'])
-        twitt = re.sub('@USER', '', twitt)
+        twitt = re.sub('@USER', '', tweet['text'])
         twitt = re.sub('HTTPURL', '', twitt)
+        twitt = clean_str(twitt)
         words = twitt.split()
 
         for word in words:
@@ -97,11 +104,12 @@ def preprocess_tweets(tweets):
                 if(word1 != word):
                     twitt = re.sub(re.escape(word), lambda _: word1,twitt)
         tweets.at[row_number,'text']= emoji.demojize(twitt)
-
+tweets =shuffle(tweets)
 preprocess_tweets(tweets)
-
+tweets = tweets[:500]
+print(tweets.head())
 sentences =tweets['text'].tolist()
-labels = tweets['Label']
+labels = tweets['Label'].tolist()
 train_or_test_list = []
 for i in range(0,int(ratio_of_train*len(labels))):
     train_or_test_list.append('train')
@@ -114,4 +122,4 @@ with open('Data/train_or_test_list.txt', 'wb') as fh:
    pickle.dump(train_or_test_list, fh)
 with open('Data/labels.txt', 'wb') as fh:
    pickle.dump(labels, fh)
-tweets.to_csv(processed_input_file,sep = '\t',index= False)
+tweets.to_csv(processed_input_file,sep = 'α',index= False)
