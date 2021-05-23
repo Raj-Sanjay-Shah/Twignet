@@ -27,7 +27,8 @@ pickle_off2 = open (train_test_list, "rb")
 train_or_test_list = pickle.load(pickle_off2)
 
 meta_data_list = []
-
+print(sentences[0])
+# print(sentences[8764],labels[8764],train_or_test_list[8764])
 for i in range(len(sentences)):
     meta = str(i) + '\t' + train_or_test_list[i] + '\t' + labels[i]
     meta_data_list.append(meta)

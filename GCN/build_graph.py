@@ -11,24 +11,26 @@ from nltk.corpus import wordnet as wn
 from sklearn.feature_extraction.text import TfidfVectorizer
 import sys
 from scipy.spatial.distance import cosine
+from sklearn.metrics.pairwise import cosine_similarity
 import warnings
+import time
 warnings.filterwarnings("ignore")
 if len(sys.argv) != 2:
-	sys.exit("Use: python build_graph.py <dataset>")
+    sys.exit("Use: python build_graph.py <dataset>")
 
 datasets = ['20ng', 'R8', 'R52', 'ohsumed', 'mr','tweets']
 # build corpus
 dataset = sys.argv[1]
 
 if dataset not in datasets:
-	sys.exit("wrong dataset name")
+    sys.exit("wrong dataset name")
 
 # Read Word Vectors
 # word_vector_file = 'data/glove.6B/glove.6B.300d.txt'
 # word_vector_file = 'data/corpus/' + dataset + '_word_vectors.txt'
 #_, embd, word_vector_map = loadWord2Vec(word_vector_file)
 # word_embeddings_dim = len(embd[0])
-
+start_time = time.time()
 word_embeddings_dim = 300
 word_vector_map = {}
 
@@ -454,20 +456,25 @@ for key in word_pair_count:
     weight.append(pmi)
 
 # word vector cosine similarity as weights
-
-'''
-for i in range(vocab_size):
+# ----------------------------------------------- Cosine
+# '''
+from tqdm import tqdm
+for i in tqdm(range(int(vocab_size/2))):
     for j in range(vocab_size):
-        if vocab[i] in word_vector_map and vocab[j] in word_vector_map:
+        if vocab[i] in word_vector_map and vocab[j] in word_vector_map and vocab[i]!=vocab[j]:
             vector_i = np.array(word_vector_map[vocab[i]])
             vector_j = np.array(word_vector_map[vocab[j]])
-            similarity = 1.0 - cosine(vector_i, vector_j)
+            similarity = cosine_similarity([vector_i], [vector_j])[0][0]
+
             if similarity > 0.9:
-                print(vocab[i], vocab[j], similarity)
+                print("similarity = ", similarity)
                 row.append(train_size + i)
                 col.append(train_size + j)
                 weight.append(similarity)
-'''
+                row.append(train_size + j)
+                col.append(train_size + i)
+                weight.append(similarity)
+# '''
 # doc word frequency
 doc_word_freq = {}
 
@@ -506,6 +513,7 @@ node_size = train_size + vocab_size + test_size
 adj = sp.csr_matrix(
     (weight, (row, col)), shape=(node_size, node_size))
 
+print("--- %s seconds ---" % (time.time() - start_time))
 # dump objects
 f = open("GCN/data/ind.{}.x".format(dataset), 'wb')
 pkl.dump(x, f)
