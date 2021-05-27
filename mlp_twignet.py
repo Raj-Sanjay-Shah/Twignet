@@ -1,4 +1,4 @@
-ratio_of_train = 0.7
+ratio_of_train = 0.5
 import numpy as np
 import pandas as pd
 import pickle

@@ -4,6 +4,7 @@ import numpy as np
 import pickle as pkl
 import networkx as nx
 import scipy.sparse as sp
+import pickle
 from utils import loadWord2Vec, clean_str
 from math import log
 from sklearn import svm
@@ -14,6 +15,8 @@ from scipy.spatial.distance import cosine
 from sklearn.metrics.pairwise import cosine_similarity
 import warnings
 import time
+import gensim.downloader as api
+from gensim.models.word2vec import Word2Vec
 warnings.filterwarnings("ignore")
 if len(sys.argv) != 2:
     sys.exit("Use: python build_graph.py <dataset>")
@@ -25,11 +28,13 @@ dataset = sys.argv[1]
 if dataset not in datasets:
     sys.exit("wrong dataset name")
 
-# Read Word Vectors
-# word_vector_file = 'data/glove.6B/glove.6B.300d.txt'
-# word_vector_file = 'data/corpus/' + dataset + '_word_vectors.txt'
-#_, embd, word_vector_map = loadWord2Vec(word_vector_file)
-# word_embeddings_dim = len(embd[0])
+sentence_dir = '/Data/sentences.txt'
+from pathlib import Path
+parent_path = Path().resolve()
+sentence_dir = str(parent_path) + sentence_dir
+pickle_off = open (sentence_dir, "rb")
+sentences = pickle.load(pickle_off)
+
 start_time = time.time()
 word_embeddings_dim = 300
 word_vector_map = {}
@@ -158,45 +163,79 @@ f.close()
 '''
 Word definitions begin
 '''
+'''
+Word2vec code
+'''
+from gensim.models import Word2Vec
+from gensim.models import KeyedVectors
+parent_path = Path().resolve()
+word2vec_dir = str(parent_path) + '/GoogleNews-vectors-negative300.bin'
+word2vec_dir = open (word2vec_dir, "rb")
+model = KeyedVectors.load_word2vec_format(word2vec_dir, binary=True)
+# model_2 = KeyedVectors.load_word2vec_format(word2vec_dir, binary=True)
+model_2 = Word2Vec(vector_size=300,min_count=1) #initiate a full model
+model_2.build_vocab(sentences) #add words in training dataset
 
-definitions = []
-
-for word in vocab:
-    word = word.strip()
-    synsets = wn.synsets(clean_str(word))
-    word_defs = []
-    for synset in synsets:
-        syn_def = synset.definition()
-        word_defs.append(syn_def)
-    word_des = ' '.join(word_defs)
-    if word_des == '':
-        word_des = '<PAD>'
-    definitions.append(word_des)
-
-string = '\n'.join(definitions)
-
-
-f = open('GCN/data/corpus/' + dataset + '_vocab_def.txt', 'w')
-f.write(string)
-f.close()
-
-tfidf_vec = TfidfVectorizer(max_features=1000)
-tfidf_matrix = tfidf_vec.fit_transform(definitions)
-tfidf_matrix_array = tfidf_matrix.toarray()
-# print(tfidf_matrix_array[0], len(tfidf_matrix_array[0]))
+total_examples = model_2.corpus_count
+#load words from pretrained google dataset
+model_2.build_vocab([list(model.key_to_index.keys())], update=True)
+# model_2.intersect_word2vec_format.wv(word2vec_dir, binary=True, lockfword2vec_dir=1.0)
+#retrain pretrained w2v from new dataset
+model_2.train(sentences, total_examples=total_examples, epochs=10)
 
 word_vectors = []
-
-for i in range(len(vocab)):
-    word = vocab[i]
-    vector = tfidf_matrix_array[i]
+for word in vocab:
+    if word in model:
+        vec = model[word]
+        # print(word)
+    else:
+        # print("This word not in model", word)
+        vec = np.zeros(300)
     str_vector = []
-    for j in range(len(vector)):
-        str_vector.append(str(vector[j]))
+    for j in range(len(vec)):
+        str_vector.append(str(vec[j]))
     temp = ' '.join(str_vector)
     word_vector = word + ' ' + temp
     word_vectors.append(word_vector)
 
+# definitions = []
+#
+# for word in vocab:
+#     word = word.strip()
+#     synsets = wn.synsets(clean_str(word))
+#     word_defs = []
+#     for synset in synsets:
+#         syn_def = synset.definition()
+#         word_defs.append(syn_def)
+#     word_des = ' '.join(word_defs)
+#     if word_des == '':
+#         word_des = '<PAD>'
+#     definitions.append(word_des)
+#
+# string = '\n'.join(definitions)
+#
+#
+# f = open('GCN/data/corpus/' + dataset + '_vocab_def.txt', 'w')
+# f.write(string)
+# f.close()
+#
+# tfidf_vec = TfidfVectorizer(max_features=1000)
+# tfidf_matrix = tfidf_vec.fit_transform(definitions)
+# tfidf_matrix_array = tfidf_matrix.toarray()
+# # print(tfidf_matrix_array[0], len(tfidf_matrix_array[0]))
+#
+# word_vectors = []
+#
+# for i in range(len(vocab)):
+#     word = vocab[i]
+#     vector = tfidf_matrix_array[i]
+#     str_vector = []
+#     for j in range(len(vector)):
+#         str_vector.append(str(vector[j]))
+#     temp = ' '.join(str_vector)
+#     word_vector = word + ' ' + temp
+#     word_vectors.append(word_vector)
+#
 string = '\n'.join(word_vectors)
 
 f = open('GCN/data/corpus/' + dataset + '_word_vectors.txt', 'w')
@@ -458,23 +497,48 @@ for key in word_pair_count:
 # word vector cosine similarity as weights
 # ----------------------------------------------- Cosine
 # '''
-from tqdm import tqdm
-for i in tqdm(range(int(vocab_size/2))):
-    for j in range(vocab_size):
-        if vocab[i] in word_vector_map and vocab[j] in word_vector_map and vocab[i]!=vocab[j]:
-            vector_i = np.array(word_vector_map[vocab[i]])
-            vector_j = np.array(word_vector_map[vocab[j]])
-            similarity = cosine_similarity([vector_i], [vector_j])[0][0]
 
-            if similarity > 0.9:
-                print("similarity = ", similarity)
-                row.append(train_size + i)
-                col.append(train_size + j)
-                weight.append(similarity)
-                row.append(train_size + j)
-                col.append(train_size + i)
-                weight.append(similarity)
-# '''
+from numpy import linalg as LA
+
+word_vector_matrix =[]
+for i in range(vocab_size):
+    word_vector_matrix.append(np.array(word_vector_map[vocab[i]]))
+
+word_vector_matrix = np.matrix(word_vector_matrix)
+matrix_norm = LA.norm(word_vector_matrix, axis = 1)
+word_vector_Norm_matrix = np.matmul(np.diag(1/matrix_norm),word_vector_matrix)
+word_vector_sim_matrix = np.matmul(word_vector_Norm_matrix,word_vector_Norm_matrix.transpose())
+super_threshold_indices = word_vector_sim_matrix < 0.8
+word_vector_sim_matrix[super_threshold_indices] = 0
+word_vector_sim_matrix[np.isnan(word_vector_sim_matrix)]=0
+
+
+print("finished")
+
+# print(type(word_vector_sim_matrix), train_size+vocab_size)
+
+shape = np.shape(word_vector_sim_matrix)
+padded_array = np.zeros((train_size+vocab_size+test_size, train_size+vocab_size+test_size))
+shape_1 = np.shape(padded_array)
+padded_array[shape_1[0]-shape[0]-test_size:shape_1[0]-test_size,shape_1[1]-shape[1]-test_size:shape_1[1]-test_size] = word_vector_sim_matrix
+word_vector_sim_matrix_sparse = sp.csr_matrix(padded_array)
+# from tqdm import tqdm
+# for i in tqdm(range(int(vocab_size/2))):
+#     for j in range(vocab_size):
+#         if vocab[i] in word_vector_map and vocab[j] in word_vector_map and vocab[i]!=vocab[j]:
+#             vector_i = np.array(word_vector_map[vocab[i]])
+#             vector_j = np.array(word_vector_map[vocab[j]])
+#             similarity = cosine_similarity([vector_i], [vector_j])[0][0]
+#
+#             if similarity > 0.9:
+#                 # print("similarity = ", similarity)
+#                 row.append(train_size + i)
+#                 col.append(train_size + j)
+#                 weight.append(similarity)
+#                 row.append(train_size + j)
+#                 col.append(train_size + i)
+#                 weight.append(similarity)
+# # '''
 # doc word frequency
 doc_word_freq = {}
 
@@ -512,7 +576,16 @@ for i in range(len(shuffle_doc_words_list)):
 node_size = train_size + vocab_size + test_size
 adj = sp.csr_matrix(
     (weight, (row, col)), shape=(node_size, node_size))
-
+# print(adj)
+# print("====")
+# print("====")
+# print("====")
+# print(word_vector_sim_matrix_sparse)
+# print("====")
+# print("====")
+# print("====")
+adj = adj + word_vector_sim_matrix_sparse
+# print(adj)
 print("--- %s seconds ---" % (time.time() - start_time))
 # dump objects
 f = open("GCN/data/ind.{}.x".format(dataset), 'wb')
