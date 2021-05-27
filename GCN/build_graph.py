@@ -516,7 +516,7 @@ word_vector_sim_matrix[np.isnan(word_vector_sim_matrix)]=0
 print("finished")
 
 # print(type(word_vector_sim_matrix), train_size+vocab_size)
-
+# Test
 shape = np.shape(word_vector_sim_matrix)
 padded_array = np.zeros((train_size+vocab_size+test_size, train_size+vocab_size+test_size))
 shape_1 = np.shape(padded_array)
