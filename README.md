@@ -1,8 +1,11 @@
+### Tasks May 27
+1. Hemanth's Data
+2. Accuracy with different splits
 ### Tasks May 16
-1. Word2vec for all the words to capture semantic meaning. Cosine Similarity->Normalization (check first). Decide Threshold?
-2. BERT base model and BERT base +
-3. Overfitting
-4. 80-20 split
+4. Word2vec for all the words to capture semantic meaning. Cosine Similarity->Normalization (check first). Decide Threshold?
+5. BERT base model and BERT base +
+6. Overfitting
+7. 80-20 split
 ### Tasks May 14
 1. Identity Matrix vs Feature Matrix
 2. Efficient Graph Creation from tweets instead of TF-IDF: Capture Importance of words in a tweet
