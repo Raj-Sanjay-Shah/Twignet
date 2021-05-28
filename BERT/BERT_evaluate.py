@@ -329,7 +329,7 @@ dataloader_validation = DataLoader(dataset_val, sampler=SequentialSampler(datase
 #
 #
 # # ------------------------
-
+# 
 
 evaluated_results =evaluate1(dataloader_train)
 evaluated_results1 = evaluate1(dataloader_validation)
