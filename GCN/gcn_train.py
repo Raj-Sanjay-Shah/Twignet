@@ -54,10 +54,10 @@ adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask, train_si
     FLAGS.dataset)
 # print(adj)
 # print(adj[0], adj[1])
-features = sp.identity(features.shape[0])  # featureless
-#
+# features = sp.identity(features.shape[0])  # featureless
+features = features.transpose() # With features
 # print(adj.shape)
-# print(features.shape)
+
 
 # Some preprocessing
 features = preprocess_features(features)
@@ -88,7 +88,8 @@ placeholders = {
 }
 
 # Create model
-# print(features[2][1])
+
+print(features[2][1])
 model = model_func(placeholders, input_dim=features[2][1], logging=True)
 
 # Initialize session
