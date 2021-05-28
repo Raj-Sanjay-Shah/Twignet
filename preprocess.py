@@ -12,8 +12,16 @@ This file is used to preprocess tweets in the following manner:
 raw_input_file1 = "train.tsv"
 raw_input_file2 = "valid.tsv"
 raw_input_file3 = "test.tsv"
+# raw_input_file4 = "Annotated_labeld_Data_Set.csv"# Hemanth's dataset
 processed_input_file = "Data/preprocessed.tsv"
-ratio_of_train = 0.7
+# Write the number of tweets wanted from respective sets below
+Number_of_train = 7000
+Number_of_test = 2000
+Number_of_validation = 1000
+# ratio_of_train = 0.5
+# Train.csv has 7000 tweets
+# valid.csv has 1000 tweets
+# test.csv has 2000 tweets
 #-----------------------------------------------------------------------------------------------
 import re
 import pandas as pd
@@ -24,11 +32,18 @@ import pickle
 import nltk
 from nltk.corpus import stopwords
 from sklearn.utils import shuffle
-# df1 = pd.read_csv(raw_input_file1,sep='\t|\n',engine = 'python')
-# df2 = pd.read_csv(raw_input_file2,sep='\t|\n',engine = 'python')
-# df3 = pd.read_csv(raw_input_file3,sep='\t|\n',engine = 'python')
-# tweets = pd.DataFrame(np.concatenate([ df2.values, df3.values]), columns=df2.columns)
-tweets = pd.read_csv(raw_input_file3,sep='\t|\n',engine = 'python')
+df1 = pd.read_csv(raw_input_file1,sep='\t|\n',engine = 'python')
+df2 = pd.read_csv(raw_input_file2,sep='\t|\n',engine = 'python')
+df3 = pd.read_csv(raw_input_file3,sep='\t|\n',engine = 'python')
+shuffle(df1)
+df1=df1[:Number_of_train]
+shuffle(df2)
+df2=df2[:Number_of_validation]
+shuffle(df3)
+df3=df3[:Number_of_test]
+tweets = pd.DataFrame(np.concatenate([ df1.values, df2.values,df3.values]), columns=df1.columns)
+# tweets = pd.read_csv(raw_input_file4,engine = 'python')
+tweets = tweets.dropna()
 tweets['text'].fillna("Empty Tweet", inplace = True)
 tweets['text'].apply(str)
 from nltk.corpus import wordnet as wn
@@ -104,16 +119,15 @@ def preprocess_tweets(tweets):
                 if(word1 != word):
                     twitt = re.sub(re.escape(word), lambda _: word1,twitt)
         tweets.at[row_number,'text']= emoji.demojize(twitt)
-tweets =shuffle(tweets)
 preprocess_tweets(tweets)
-tweets = tweets[:500]
+
 print(tweets.head())
 sentences =tweets['text'].tolist()
 labels = tweets['Label'].tolist()
 train_or_test_list = []
-for i in range(0,int(ratio_of_train*len(labels))):
+for i in range(0,int(Number_of_train+Number_of_validation)):
     train_or_test_list.append('train')
-for i in range(int(ratio_of_train*len(labels)),len(labels)):
+for i in range(int(Number_of_train+Number_of_validation),len(labels)):
     train_or_test_list.append('test')
 
 with open('Data/sentences.txt', 'wb') as fh:

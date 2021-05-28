@@ -118,7 +118,7 @@ loss, accuracy = model.evaluate(np.array(X_test), y_test, verbose=1)
 print("========================")
 print("Testing Accuracy:  {:.4f}".format(accuracy))
 print("========================")
-
+# 
 # print(input_dim)
 # model = Sequential()
 # model.add(Conv1D(filters=64, kernel_size=2, activation='relu', input_dim=input_dim))

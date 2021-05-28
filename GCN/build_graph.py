@@ -1,3 +1,5 @@
+Number_of_validation = 1000
+#
 import os
 import random
 import numpy as np
@@ -266,7 +268,7 @@ f.close()
 # x: feature vectors of training docs, no initial features
 # slect 90% training set
 train_size = len(train_ids)
-val_size = int(0.1 * train_size)
+val_size = int(Number_of_validation)
 real_train_size = train_size - val_size  # - int(0.5 * train_size)
 # different training rates
 
