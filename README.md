@@ -1,3 +1,9 @@
+### Tasks May 29
+1. Plot Word2vec embeddings
+2. Tool
+3. TSNE
+4. PCA
+5. SOM
 ### Tasks May 27
 1. Hemanth's Data
 2. Accuracy with different splits
