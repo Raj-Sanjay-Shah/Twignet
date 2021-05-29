@@ -1,3 +1,11 @@
+### Commenting
+1. Preprocess
+2. GCN Train
+3. Build Graph
+4. BERT Evaluate
+5. MLP_Twignet
+6. Utils: Load_Corpus
+
 ### Tasks May 29
 1. Plot Word2vec embeddings
 2. Tool
