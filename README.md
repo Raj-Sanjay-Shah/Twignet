@@ -5,6 +5,7 @@
 4. PCA
 5. SOM
 6. Print which tweets are correct
+7. BERT with different train tweets splits
 ### Tasks May 27
 1. Hemanth's Data
 2. Accuracy with different splits
