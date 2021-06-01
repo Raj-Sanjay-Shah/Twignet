@@ -8,7 +8,7 @@ This file is used to preprocess tweets in the following manner:
 --Decontraction of phrases
 --Stop word removal
 """
-# This is a test for Saumitra Git Learning
+
 #-----------------------------------------------------------------------------------------------
 raw_input_file1 = "train.tsv"
 raw_input_file2 = "valid.tsv"
