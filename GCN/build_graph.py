@@ -189,8 +189,8 @@ model_2.init_sims(replace = True)
 word_vectors_num = []
 word_vectors = []
 for word in vocab:
-    if word in model_2:
-        vec = model_2[word]
+    if word in model_2.wv:
+        vec = model_2.wv[word]
         # print(word)
     else:
         # print("This word not in model", word)
