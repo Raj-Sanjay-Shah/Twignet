@@ -175,20 +175,22 @@ word2vec_dir = str(parent_path) + '/GoogleNews-vectors-negative300.bin'
 word2vec_dir = open (word2vec_dir, "rb")
 model = KeyedVectors.load_word2vec_format(word2vec_dir, binary=True)
 # model_2 = KeyedVectors.load_word2vec_format(word2vec_dir, binary=True)
-model_2 = Word2Vec(vector_size=300,min_count=1) #initiate a full model
+model_2 = Word2Vec(vector_size=300,min_count=1,workers=2) #initiate a full model
 model_2.build_vocab(sentences) #add words in training dataset
-
-total_examples = model_2.corpus_count
 #load words from pretrained google dataset
 model_2.build_vocab([list(model.key_to_index.keys())], update=True)
+total_examples = model_2.corpus_count
 # model_2.intersect_word2vec_format.wv(word2vec_dir, binary=True, lockfword2vec_dir=1.0)
 #retrain pretrained w2v from new dataset
-model_2.train(sentences, total_examples=total_examples, epochs=10)
+model_2.train(sentences, total_examples=total_examples , epochs=20, report_delay = 1)
+model_2.init_sims(replace = True)
+# print(model_2.wv.most_similar(positive=["covid"]))
 
+word_vectors_num = []
 word_vectors = []
 for word in vocab:
-    if word in model:
-        vec = model[word]
+    if word in model_2:
+        vec = model_2[word]
         # print(word)
     else:
         # print("This word not in model", word)
@@ -197,7 +199,9 @@ for word in vocab:
     for j in range(len(vec)):
         str_vector.append(str(vec[j]))
     temp = ' '.join(str_vector)
+    temp1 = '\t'.join(str_vector)
     word_vector = word + ' ' + temp
+    word_vectors_num.append(temp1)
     word_vectors.append(word_vector)
 
 # definitions = []
@@ -239,11 +243,13 @@ for word in vocab:
 #     word_vectors.append(word_vector)
 #
 string = '\n'.join(word_vectors)
-
+string1 = '\n'.join(word_vectors_num)
 f = open('GCN/data/corpus/' + dataset + '_word_vectors.txt', 'w')
 f.write(string)
 f.close()
-
+f = open('GCN/data/corpus/' + dataset + '_word_vectors_num.txt', 'w')
+f.write(string1)
+f.close()
 word_vector_file = 'GCN/data/corpus/' + dataset + '_word_vectors.txt'
 _, embd, word_vector_map = loadWord2Vec(word_vector_file)
 word_embeddings_dim = len(embd[0])
@@ -421,7 +427,9 @@ print(x.shape, y.shape, tx.shape, ty.shape, allx.shape, ally.shape)
 '''
 Doc word heterogeneous graph
 '''
-
+#  [ 20000 * 20000]
+# [Train_size + Validation_Size + Vocab_Size + Test_size]
+# [0, 0, 0, 0 ..:Test_Size]
 # word co-occurence with context windows
 window_size = 20
 windows = []
@@ -590,10 +598,13 @@ adj = adj + word_vector_sim_matrix_sparse
 # print(adj)
 print("--- %s seconds ---" % (time.time() - start_time))
 # dump objects
+#  X here is the train set + Validation set
 f = open("GCN/data/ind.{}.x".format(dataset), 'wb')
 pkl.dump(x, f)
 f.close()
+# y is the labels for them
 
+#  Train + validation + vocab + test_size
 f = open("GCN/data/ind.{}.y".format(dataset), 'wb')
 pkl.dump(y, f)
 f.close()
