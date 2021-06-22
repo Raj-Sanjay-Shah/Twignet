@@ -8,6 +8,7 @@ This file is used to preprocess tweets in the following manner:
 --Decontraction of phrases
 --Stop word removal
 """
+results_file = "results.txt"
 
 #-----------------------------------------------------------------------------------------------
 raw_input_file1 = "train.tsv"
@@ -16,14 +17,19 @@ raw_input_file3 = "test.tsv"
 # raw_input_file4 = "Annotated_labeld_Data_Set.csv"# Hemanth's dataset
 processed_input_file = "Data/preprocessed.tsv"
 # Write the number of tweets wanted from respective sets below
-Number_of_train = 7000
-Number_of_test = 2000
+Number_of_train =2000
+Number_of_test =   1
 Number_of_validation = 1000
 # ratio_of_train = 0.5
 # Train.csv has 7000 tweets
 # valid.csv has 1000 tweets
 # test.csv has 2000 tweets
 #-----------------------------------------------------------------------------------------------
+with open(results_file, "a+") as file:
+    file.write("\n================================================================\n")
+
+    file.write("Number of train, test and validation = " + str(Number_of_train) + ", " +str(Number_of_test)+ ", " + str(Number_of_validation) + "\n" )
+
 import re
 import pandas as pd
 import numpy as np
@@ -36,13 +42,17 @@ from sklearn.utils import shuffle
 df1 = pd.read_csv(raw_input_file1,sep='\t|\n',engine = 'python')
 df2 = pd.read_csv(raw_input_file2,sep='\t|\n',engine = 'python')
 df3 = pd.read_csv(raw_input_file3,sep='\t|\n',engine = 'python')
-shuffle(df1)
+df1 = shuffle(df1)
 df1=df1[:Number_of_train]
-shuffle(df2)
+df2 = shuffle(df2)
 df2=df2[:Number_of_validation]
-shuffle(df3)
+df3 = shuffle(df3)
 df3=df3[:Number_of_test]
 tweets = pd.DataFrame(np.concatenate([ df1.values, df2.values,df3.values]), columns=df1.columns)
+if (Number_of_test == 0):
+    tweets = pd.DataFrame(np.concatenate([ df1.values,df2.values]), columns=df1.columns)
+else:
+    tweets = pd.DataFrame(np.concatenate([ df1.values, df2.values,df3.values]), columns=df1.columns)
 # tweets = pd.read_csv(raw_input_file4,engine = 'python')
 tweets = tweets.dropna()
 tweets['text'].fillna("Empty Tweet", inplace = True)
@@ -126,11 +136,20 @@ print(tweets.head())
 sentences =tweets['text'].tolist()
 labels = tweets['Label'].tolist()
 train_or_test_list = []
-for i in range(0,int(Number_of_train+Number_of_validation)):
-    train_or_test_list.append('train')
-for i in range(int(Number_of_train+Number_of_validation),len(labels)):
-    train_or_test_list.append('test')
-
+# for i in range(0,int(Number_of_train+Number_of_validation)):
+#     train_or_test_list.append('train')
+# for i in range(int(Number_of_train+Number_of_validation),len(labels)):
+#     train_or_test_list.append('test')
+if (Number_of_test == 0):
+    for i in range(0,int(Number_of_train)):
+        train_or_test_list.append('train')
+    for i in range(int(Number_of_train),len(labels)):
+        train_or_test_list.append('test')
+else:
+    for i in range(0,int(Number_of_train+Number_of_validation)):
+        train_or_test_list.append('train')
+    for i in range(int(Number_of_train+Number_of_validation),len(labels)):
+        train_or_test_list.append('test')
 with open('Data/sentences.txt', 'wb') as fh:
    pickle.dump(sentences, fh)
 with open('Data/train_or_test_list.txt', 'wb') as fh:

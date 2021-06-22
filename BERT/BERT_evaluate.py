@@ -1,10 +1,10 @@
 #-----------------------------------------------------------------------------------------------
 processed_input_file = "\\Data\\preprocessed.tsv"
 BERT_embeddings_tweets = "\\Data\\bert_embeddings.txt"
-model_finetuned = "\\BERT\\finetuned_BERT_epoch_3.model"
+model_finetuned = "\\BERT\\finetuned_BERT_Large_epoch1_3.model"
 seed_val = 17
 batch_size = 32
-ratio_of_train = 0.5
+ratio_of_train = 2000/3001
 #-----------------------------------------------------------------------------------------------
 import torch
 import pandas as pd
@@ -229,8 +229,8 @@ pickle_off1 = open ('Data/label_dict.txt', "rb")
 label_dict = pickle.load(pickle_off1)
 df['label'] = df.Label.replace(label_dict)
 df['text'].fillna("Empty Tweet", inplace = True)
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=len(label_dict), output_attentions=False, output_hidden_states=True)
+tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True)
+model = BertForSequenceClassification.from_pretrained("bert-large-uncased", num_labels=len(label_dict), output_attentions=False, output_hidden_states=True)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 model.load_state_dict(torch.load(model_finetuned, map_location=torch.device('cpu')))
@@ -329,7 +329,7 @@ dataloader_validation = DataLoader(dataset_val, sampler=SequentialSampler(datase
 #
 #
 # # ------------------------
-# 
+#
 
 evaluated_results =evaluate1(dataloader_train)
 evaluated_results1 = evaluate1(dataloader_validation)

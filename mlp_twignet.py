@@ -1,4 +1,4 @@
-ratio_of_train = 0.5
+ratio_of_train = 2000/3001
 import numpy as np
 import pandas as pd
 import pickle
@@ -14,7 +14,9 @@ from keras.preprocessing import sequence
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import VotingClassifier
 import warnings
+from sklearn.ensemble import RandomForestClassifier
 from tensorflow import keras
 import os
 warnings.filterwarnings("ignore")
@@ -26,6 +28,17 @@ def accuracy(confusion_matrix):
    diagonal_sum = confusion_matrix.trace()
    sum_of_all_elements = confusion_matrix.sum()
    return diagonal_sum / sum_of_all_elements
+
+
+def ensemble(y_pred_MLP, y_pred_Logistic, y_pred_SVM):
+    y_pred = []
+    for i in range(len(y_pred_MLP)):
+        count = int(y_pred_MLP[i]) + int(y_pred_SVM[i]) + int(y_pred_Logistic[i])
+        if(count == 0 or count == 1):
+            y_pred.append(0)
+        else:
+            y_pred.append(1)
+    return y_pred
 
 pickle_off = open ("Data/bert_embeddings.txt", "rb")
 bert_embeddings = pickle.load(pickle_off)
@@ -63,35 +76,43 @@ for i in range(0,len(bert_embeddings)):
 df1 = pd.DataFrame(data, columns = ['embeddings', 'label'])
 
 X_train, X_test, y_train, y_test = train_test_split(X, y,random_state=1, test_size=(1-ratio_of_train),shuffle = False)
-
-print("Size of train =",len(X_train),"\t Size of test =",len(X_test))
-classifier = MLPClassifier(hidden_layer_sizes=(968,968), max_iter=200,activation = 'identity',solver='adam',random_state=1)
-classifier.fit(X_train, y_train)
-y_pred = classifier.predict(X_test)
-
-cm = confusion_matrix(y_pred, y_test)
-print("========================")
-print("Accuracy of MLPClassifier : ", accuracy(cm))
-print("========================")
 lb = LabelBinarizer()
 lb.fit(y_train)
 y_train = lb.transform(y_train)
 y_test = lb.transform(y_test)
-
-
-classifier = LogisticRegression()
+print("Size of train =",len(X_train),"\t Size of test =",len(X_test))
+classifier = MLPClassifier(hidden_layer_sizes=(968,968), max_iter=200,activation = 'identity',solver='adam',random_state=1)
 classifier.fit(X_train, y_train)
-score = classifier.score(X_test, y_test)
+y_pred_MLP = classifier.predict(X_test)
+
+cm = confusion_matrix(y_pred_MLP, y_test)
+print("========================")
+print("Accuracy of MLPClassifier : ", accuracy(cm))
+print("========================")
+
+
+
+classifier_1 = LogisticRegression()
+classifier_1.fit(X_train, y_train)
+y_pred_Logistic = classifier_1.predict(X_test)
+# print(y_pred_Logistic)
+score = classifier_1.score(X_test, y_test)
 print("========================")
 print("Logistic regression Accuracy:", score)
 print("========================")
-print("==========SVM===========")
 from sklearn import svm
-clf = svm.SVC()
-clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-cm = confusion_matrix(y_pred, y_test)
+clf_SVM = svm.SVC()
+clf_SVM.fit(X_train, y_train)
+y_pred_SVM = clf_SVM.predict(X_test)
+cm = confusion_matrix(y_pred_SVM, y_test)
 print("Accuracy of SVM : ", accuracy(cm))
+print("========================")
+# print(y_pred_SVM)
+print("Accuracy of Ensemble : ", accuracy(confusion_matrix(ensemble(y_pred_MLP.tolist(), y_pred_Logistic.tolist(), y_pred_SVM.tolist()), y_test)))
+print("========================")
+clf_RF = RandomForestClassifier(n_estimators=100)
+clf_RF.fit(X_train, y_train)
+print("Accuracy of Random Forest : ", accuracy(confusion_matrix(clf_RF.predict(X_test), y_test)))
 print("========================")
 
 
@@ -118,7 +139,7 @@ loss, accuracy = model.evaluate(np.array(X_test), y_test, verbose=1)
 print("========================")
 print("Testing Accuracy:  {:.4f}".format(accuracy))
 print("========================")
-# 
+#
 # print(input_dim)
 # model = Sequential()
 # model.add(Conv1D(filters=64, kernel_size=2, activation='relu', input_dim=input_dim))

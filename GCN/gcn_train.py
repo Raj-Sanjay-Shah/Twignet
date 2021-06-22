@@ -14,6 +14,7 @@ import sys
 import pickle
 from pathlib import Path
 import warnings
+results_file = "results.txt"
 warnings.filterwarnings("ignore")
 if len(sys.argv) != 2:
 	sys.exit("Use: python train.py <dataset>")
@@ -54,7 +55,7 @@ adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask, train_si
     FLAGS.dataset)
 # print(adj)
 # print(adj[0], adj[1])
-# features = sp.identity(features.shape[0])  # featureless
+features = sp.identity(features.shape[0])  # featureless
 features = features.transpose() # With features
 # print(adj.shape)
 
@@ -160,7 +161,17 @@ print("Macro average Test Precision, Recall and F1-Score...")
 print(metrics.precision_recall_fscore_support(test_labels, test_pred, average='macro'))
 print("Micro average Test Precision, Recall and F1-Score...")
 print(metrics.precision_recall_fscore_support(test_labels, test_pred, average='micro'))
-
+with open(results_file, "a+") as file:
+	file.write("\nGCN Results on Test\n")
+	file.write("Test Precision, Recall and F1-Score...\n")
+	file.write(str(metrics.classification_report(test_labels, test_pred, digits=4)))
+	file.write("\n")
+	file.write("Macro average Test Precision, Recall and F1-Score...\n")
+	file.write(str(metrics.precision_recall_fscore_support(test_labels, test_pred, average='macro')))
+	file.write("\n")
+	file.write("Micro average Test Precision, Recall and F1-Score...\n")
+	file.write(str(metrics.precision_recall_fscore_support(test_labels, test_pred, average='micro')))
+	file.write("\n")
 # doc and word embeddings
 print('embeddings:')
 word_embeddings = outs[3][train_size: adj.shape[0] - test_size]
