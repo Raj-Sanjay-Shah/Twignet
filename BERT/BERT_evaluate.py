@@ -1,10 +1,12 @@
 #-----------------------------------------------------------------------------------------------
 processed_input_file = "\\Data\\preprocessed.tsv"
 BERT_embeddings_tweets = "\\Data\\bert_embeddings.txt"
-model_finetuned = "\\BERT\\finetuned_BERT_Large_epoch1_3.model"
+model_finetuned = "\\BERT\\finetuned_BERT_epoch_3.model"
 seed_val = 17
 batch_size = 32
-ratio_of_train = 2000/3001
+ratio_of_train =  500/3500
+# model_name = "digitalepidemiologylab/covid-twitter-bert"
+model_name = "bert-base-uncased"
 #-----------------------------------------------------------------------------------------------
 import torch
 import pandas as pd
@@ -13,8 +15,8 @@ import numpy as np
 import random
 import pickle
 from sklearn.model_selection import train_test_split
-from transformers import BertTokenizer
-from transformers import BertForSequenceClassification
+from transformers import AutoTokenizer
+from transformers import AutoModelForSequenceClassification
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from sklearn.metrics import f1_score
@@ -229,8 +231,8 @@ pickle_off1 = open ('Data/label_dict.txt', "rb")
 label_dict = pickle.load(pickle_off1)
 df['label'] = df.Label.replace(label_dict)
 df['text'].fillna("Empty Tweet", inplace = True)
-tokenizer = BertTokenizer.from_pretrained('bert-large-uncased', do_lower_case=True)
-model = BertForSequenceClassification.from_pretrained("bert-large-uncased", num_labels=len(label_dict), output_attentions=False, output_hidden_states=True)
+tokenizer = AutoTokenizer.from_pretrained(model_name, do_lower_case=True)
+model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=len(label_dict), output_attentions=False, output_hidden_states=True)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 model.load_state_dict(torch.load(model_finetuned, map_location=torch.device('cpu')))
@@ -245,7 +247,7 @@ df.loc[X_train, 'data_type'] = 'train'
 df.groupby(['Label', 'label', 'data_type1']).count()
 
 encoded_data_train = tokenizer.batch_encode_plus(
-    df[df.data_type=='train'].text.values,
+    df[df.data_type=='train'].text.values.tolist(),
     add_special_tokens=True,
     return_attention_mask=True,
     padding=True,
@@ -254,7 +256,7 @@ encoded_data_train = tokenizer.batch_encode_plus(
 )
 
 encoded_data_val = tokenizer.batch_encode_plus(
-    df[df.data_type1=='val'].text.values,
+    df[df.data_type1=='val'].text.values.tolist(),
     add_special_tokens=True,
     return_attention_mask=True,
     padding=True,
@@ -331,11 +333,12 @@ dataloader_validation = DataLoader(dataset_val, sampler=SequentialSampler(datase
 # # ------------------------
 #
 
-evaluated_results =evaluate1(dataloader_train)
-evaluated_results1 = evaluate1(dataloader_validation)
+# evaluated_results =evaluate1(dataloader_train)
+# evaluated_results1 = evaluate1(dataloader_validation)
 target_tweet_embeddings = []
 texts = df['text'].tolist()
 count = 0
+id_embedd_dict = {}
 for text in texts:
     tokenized_text, tokens_tensor, segments_tensors = bert_text_preparation(text, tokenizer)
     list_token_embeddings = get_bert_embeddings(tokens_tensor, segments_tensors, model)
@@ -344,14 +347,14 @@ for text in texts:
 
 with open(BERT_embeddings_tweets , 'wb') as fh:
    pickle.dump(target_tweet_embeddings, fh)
-print("--------------Train Results--------------")
-preds_flat = np.argmax(evaluated_results[1], axis=1).flatten()
-labels_flat = evaluated_results[2].flatten()
-print(accuracy_per_class(evaluated_results[1], evaluated_results[2]))
-print(classification_report(labels_flat, preds_flat))
-# explain(df.text,df.label,df.Label,model,tokenizer)
-print("--------------Test Results---------------")
-preds_flat = np.argmax(evaluated_results1[1], axis=1).flatten()
-labels_flat = evaluated_results1[2].flatten()
-print(accuracy_per_class(evaluated_results1[1], evaluated_results1[2]))
-print(classification_report(labels_flat, preds_flat))
+# print("--------------Train Results--------------")
+# preds_flat = np.argmax(evaluated_results[1], axis=1).flatten()
+# labels_flat = evaluated_results[2].flatten()
+# print(accuracy_per_class(evaluated_results[1], evaluated_results[2]))
+# print(classification_report(labels_flat, preds_flat, digits =4))
+# # explain(df.text,df.label,df.Label,model,tokenizer)
+# print("--------------Test Results---------------")
+# preds_flat = np.argmax(evaluated_results1[1], axis=1).flatten()
+# labels_flat = evaluated_results1[2].flatten()
+# print(accuracy_per_class(evaluated_results1[1], evaluated_results1[2]))
+# print(classification_report(labels_flat, preds_flat,digits =4))

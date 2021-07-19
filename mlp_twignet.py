@@ -1,4 +1,4 @@
-ratio_of_train = 2000/3001
+ratio_of_train = 5000/8000
 import numpy as np
 import pandas as pd
 import pickle
@@ -40,7 +40,7 @@ def ensemble(y_pred_MLP, y_pred_Logistic, y_pred_SVM):
             y_pred.append(1)
     return y_pred
 
-pickle_off = open ("Data/bert_embeddings.txt", "rb")
+pickle_off = open ("Data/bert_large_embeddings_10000_experiment.txt", "rb")
 bert_embeddings = pickle.load(pickle_off)
 
 pickle_off1 = open ("Data/doc_vectors.txt", "rb")

@@ -1,0 +1,14 @@
+covid-vectors-phrase.bin
+GCN/data/mr.txt
+BERT Tweets.csv
+better.txt
+discussion.txt
+format.txt
+glove.twitter.27B.50d.txt
+hatespeech_text_label_vote_RESTRICTED_100K.csv
+glove.twitter.27B.50d.txt
+imdb.csv
+labeledData.csv
+BERT/models/finetuned_BERT_epoch_1.model
+BERT/models/finetuned_BERT_epoch_2.model
+BERT/models/finetuned_BERT_epoch_3.model

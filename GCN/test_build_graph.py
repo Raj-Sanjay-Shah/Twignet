@@ -1,13 +1,11 @@
+
 Number_of_validation = 1000
 #
-from sklearn.preprocessing import normalize
-
 import os
 import random
 import numpy as np
 import pickle as pkl
 import networkx as nx
-import scipy
 import scipy.sparse as sp
 import pickle
 from utils import loadWord2Vec, clean_str
@@ -22,51 +20,6 @@ import warnings
 import time
 import gensim.downloader as api
 from gensim.models.word2vec import Word2Vec
-from tqdm import tqdm
-glove_path = "GCN/glove.twitter.27B.50d.txt"
-def get_coefs(word,*arr):
-    return word, np.asarray(arr, dtype='float32')
-
-def get_embdedings_matrix(embeddings_index, word_index, nb_words = None):
-    all_embs = np.stack(embeddings_index.values())
-    print('Shape of Full Embeddding Matrix', all_embs.shape)
-    embed_dims = all_embs.shape[1]
-    emb_mean,emb_std = all_embs.mean(), all_embs.std()
-    del all_embs
-    if nb_words is None:
-        nb_words = len(word_index)
-    else:
-        nb_words = min(nb_words, len(word_index))
-
-    embedding_matrix = np.random.normal(emb_mean, emb_std, (nb_words, embed_dims))
-    found_vectors = 0
-    words_not_found = []
-    for word, i in tqdm(word_index.items()):
-        if i >= nb_words:
-            continue
-        embedding_vector = None
-        if word in embeddings_index:
-            embedding_vector = embeddings_index.get(word)
-        elif word.lower() in embeddings_index:
-            embedding_vector = embeddings_index.get(word.lower())
-        # for twitter check if the key is a hashtag
-        elif '#'+word.lower() in embeddings_index:
-            embedding_vector = embeddings_index.get('#'+word.lower())
-
-        if embedding_vector is not None:
-            found_vectors += 1
-            embedding_matrix[i] = embedding_vector
-        else:
-            words_not_found.append((word, i))
-
-    print("% of Vectors found in Corpus", found_vectors / nb_words)
-    return embedding_matrix, words_not_found
-def load_twitter(word_index):
-    embed_file_path = glove_path
-    embeddings_index = dict(get_coefs(*o.split(" ")) for o in tqdm(open(embed_file_path)))
-    print("Built Embedding Index:", len(embeddings_index))
-    return get_embdedings_matrix(embeddings_index, word_index)
-
 warnings.filterwarnings("ignore")
 if len(sys.argv) != 2:
     sys.exit("Use: python build_graph.py <dataset>")
@@ -210,55 +163,40 @@ f = open('GCN/data/corpus/' + dataset + '_vocab.txt', 'w')
 f.write(vocab_str)
 f.close()
 
-
 '''
 Word definitions begin
 '''
 '''
-Glove model
-'''
-# print('Loading Twitter Model...')
-# twitter_embed_matrix, words_not_found =  load_twitter(vocab)
-'''
 Word2vec code
 '''
-#
-from gensim.models import Word2Vec
-from gensim.models import KeyedVectors
-parent_path = Path().resolve()
 sen = []
 for i in range(len(sentences)):
     sen.append(sentences[i].split(' '))
 sentences = sen
+from gensim.models import Word2Vec
+from gensim.models import KeyedVectors
+parent_path = Path().resolve()
 word2vec_dir = str(parent_path) + '/GoogleNews-vectors-negative300.bin'
-# word2vec_dir = str(parent_path) + '/covid-vectors-phrase.bin'
-
 word2vec_dir = open (word2vec_dir, "rb")
 model = KeyedVectors.load_word2vec_format(word2vec_dir, binary=True)
-model_2 = Word2Vec(vector_size=30,min_count=1,workers=2) #initiate a full model
+# model_2 = KeyedVectors.load_word2vec_format(word2vec_dir, binary=True)
+model_2 = Word2Vec(vector_size=300,min_count=1,workers=2) #initiate a full model
 model_2.build_vocab(sentences) #add words in training dataset
 #load words from pretrained google dataset
-# model_2.build_vocab([list(model.key_to_index.keys())], update=True)
+model_2.build_vocab([list(model.key_to_index.keys())], update=True)
 total_examples = model_2.corpus_count
-print(len(sentences), len(sentences[-1]))
 # model_2.intersect_word2vec_format.wv(word2vec_dir, binary=True, lockfword2vec_dir=1.0)
 #retrain pretrained w2v from new dataset
-# print("total count =", total_examples)
-# print(sentences)
-model_2.train(sentences, total_examples=total_examples , epochs=100, report_delay = 1)
+model_2.train(sentences, total_examples=total_examples , epochs=20, report_delay = 1)
 model_2.init_sims(replace = True)
-print(len(model_2.wv.index_to_key))
 # print(model_2.wv.most_similar(positive=["covid"]))
-counter_word_vec = 0
-# Run only the pretrained vectors
-# model_2.wv = model
+
 word_vectors_num = []
 word_vectors = []
 for word in vocab:
     if word in model_2.wv:
         vec = model_2.wv[word]
         # print(word)
-        counter_word_vec+=1
     else:
         # print("This word not in model", word)
         vec = np.zeros(300)
@@ -270,8 +208,7 @@ for word in vocab:
     word_vector = word + ' ' + temp
     word_vectors_num.append(temp1)
     word_vectors.append(word_vector)
-print("percentage of words that exist in word2vec pretrained:",counter_word_vec/len(vocab))
-# Word2vec end ==============================================================
+
 # definitions = []
 #
 # for word in vocab:
@@ -586,27 +523,37 @@ word_vector_matrix = np.matrix(word_vector_matrix)
 matrix_norm = LA.norm(word_vector_matrix, axis = 1)
 word_vector_Norm_matrix = np.matmul(np.diag(1/matrix_norm),word_vector_matrix)
 word_vector_sim_matrix = np.matmul(word_vector_Norm_matrix,word_vector_Norm_matrix.transpose())
-super_threshold_indices = word_vector_sim_matrix < 0.6
-super_t =  word_vector_sim_matrix > 0.99
-# np.fill_diagonal(super_t, False)
-# print(super_t)
-word_vector_sim_matrix[super_t] = 0
+super_threshold_indices = word_vector_sim_matrix < 0.8
 word_vector_sim_matrix[super_threshold_indices] = 0
 word_vector_sim_matrix[np.isnan(word_vector_sim_matrix)]=0
 
-#
+
 print("finished")
 
-print(type(word_vector_sim_matrix), train_size+vocab_size)
+# print(type(word_vector_sim_matrix), train_size+vocab_size)
 
 shape = np.shape(word_vector_sim_matrix)
 padded_array = np.zeros((train_size+vocab_size+test_size, train_size+vocab_size+test_size))
 shape_1 = np.shape(padded_array)
 padded_array[shape_1[0]-shape[0]-test_size:shape_1[0]-test_size,shape_1[1]-shape[1]-test_size:shape_1[1]-test_size] = word_vector_sim_matrix
-# Sparse matrix for Cosine similarity based edges
 word_vector_sim_matrix_sparse = sp.csr_matrix(padded_array)
-
-
+# from tqdm import tqdm
+# for i in tqdm(range(int(vocab_size/2))):
+#     for j in range(vocab_size):
+#         if vocab[i] in word_vector_map and vocab[j] in word_vector_map and vocab[i]!=vocab[j]:
+#             vector_i = np.array(word_vector_map[vocab[i]])
+#             vector_j = np.array(word_vector_map[vocab[j]])
+#             similarity = cosine_similarity([vector_i], [vector_j])[0][0]
+#
+#             if similarity > 0.9:
+#                 # print("similarity = ", similarity)
+#                 row.append(train_size + i)
+#                 col.append(train_size + j)
+#                 weight.append(similarity)
+#                 row.append(train_size + j)
+#                 col.append(train_size + i)
+#                 weight.append(similarity)
+# # '''
 # doc word frequency
 doc_word_freq = {}
 
@@ -621,9 +568,6 @@ for doc_id in range(len(shuffle_doc_words_list)):
         else:
             doc_word_freq[doc_word_str] = 1
 
-row_1 = []
-col_1 = []
-weight_1 = []
 for i in range(len(shuffle_doc_words_list)):
     doc_words = shuffle_doc_words_list[i]
     words = doc_words.split()
@@ -635,22 +579,16 @@ for i in range(len(shuffle_doc_words_list)):
         key = str(i) + ',' + str(j)
         freq = doc_word_freq[key]
         if i < train_size:
-            row_1.append(i)
+            row.append(i)
         else:
-            row_1.append(i + vocab_size)
-        col_1.append(train_size + j)
+            row.append(i + vocab_size)
+        col.append(train_size + j)
         idf = log(1.0 * len(shuffle_doc_words_list) /
                   word_doc_freq[vocab[j]])
-        weight_1.append(freq * idf)
-        # weight.append(0.1)
+        weight.append(freq * idf)
         doc_word_set.add(word)
 
 node_size = train_size + vocab_size + test_size
-# Sparse matrix for tf-idf and pmi based edges
-
-adj_1 = sp.csr_matrix(
-    (weight_1, (row_1, col_1)), shape=(node_size, node_size))
-# adj_1 = normalize(adj_1, norm='l1', axis=1)
 adj = sp.csr_matrix(
     (weight, (row, col)), shape=(node_size, node_size))
 # print(adj)
@@ -661,40 +599,7 @@ adj = sp.csr_matrix(
 # print("====")
 # print("====")
 # print("====")
-adj = adj + word_vector_sim_matrix_sparse + adj_1
-
-# Normalizing the full adjacency matrix (already once partially normalized)
-# adj = normalize(adj, norm='l1', axis=1)
-
-def zero_rows(M, rows):
-    diag = scipy.sparse.eye(M.shape[0]).tolil()
-    for r in rows:
-        diag[r, r] = 0
-    return diag.dot(M)
-
-def zero_columns(M, columns):
-    diag = scipy.sparse.eye(M.shape[1]).tolil()
-    for c in columns:
-        diag[c, c] = 0
-    return M.dot(diag)
-
-def remove_word_from_vocab( m, word):
-    print("The word with highest frequency is :", word)
-    if word in word_id_map:
-        id = word_id_map[word] + train_size
-        return zero_columns(zero_rows(m , [id]), [id])
-    else:
-        print("word not found")
-        return m
-
-def key_with_max_val(d):
-     """ a) create a list of the dict's keys and values;
-         b) return the key with the max value"""
-     v=list(d.values())
-     k=list(d.keys())
-     return k[v.index(max(v))]
-
-# remove_word_from_vocab(adj,key_with_max_val(word_doc_freq))
+adj = adj + word_vector_sim_matrix_sparse
 # print(adj)
 print("--- %s seconds ---" % (time.time() - start_time))
 # dump objects

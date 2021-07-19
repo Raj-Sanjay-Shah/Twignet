@@ -27,7 +27,7 @@ if dataset not in datasets:
 
 
 # Set random seed
-seed = random.randint(1, 200)
+seed = 17
 np.random.seed(seed)
 tf.set_random_seed(seed)
 
@@ -41,21 +41,23 @@ flags.DEFINE_string('dataset', dataset, 'Dataset string.')
 # 'gcn', 'gcn_cheby', 'dense'
 flags.DEFINE_string('model', model_name, 'Model string.')
 flags.DEFINE_float('learning_rate', 0.005, 'Initial learning rate.')
-flags.DEFINE_integer('epochs', 50, 'Number of epochs to train.')
+flags.DEFINE_integer('epochs', 100, 'Number of epochs to train.')
 flags.DEFINE_integer('hidden1', 200, 'Number of units in hidden layer 1.')
-flags.DEFINE_float('dropout', 0.3, 'Dropout rate (1 - keep probability).')
+flags.DEFINE_float('dropout', 0.1, 'Dropout rate (1 - keep probability).')
 flags.DEFINE_float('weight_decay', 0,
                    'Weight for L2 loss on embedding matrix.')  # 5e-4
 flags.DEFINE_integer('early_stopping', 2,
                      'Tolerance for early stopping (# of epochs).')
 flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
 
+
+
 # Load data
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask, train_size, test_size = load_corpus(
     FLAGS.dataset)
 # print(adj)
 # print(adj[0], adj[1])
-features = sp.identity(features.shape[0])  # featureless
+# features = sp.identity(features.shape[0])  # featureless
 features = features.transpose() # With features
 # print(adj.shape)
 
@@ -129,7 +131,7 @@ for epoch in range(FLAGS.epochs):
     cost, acc, pred, labels, duration = evaluate(
         features, support, y_val, val_mask, placeholders)
     cost_val.append(cost)
-
+    # print(metrics.classification_report(labels, pred, digits=4))
     print("Epoch:", '%04d' % (epoch + 1), "train_loss=", "{:.5f}".format(outs[1]),
           "train_acc=", "{:.5f}".format(
               outs[2]), "val_loss=", "{:.5f}".format(cost),
@@ -141,6 +143,18 @@ for epoch in range(FLAGS.epochs):
 
 print("Optimization Finished!")
 
+#val
+test_pred = []
+test_labels = []
+# print(len(vsal_mask))
+for i in range(len(val_mask)):
+    if val_mask[i]:
+        test_pred.append(pred[i])
+        test_labels.append(labels[i])
+
+print("Test Precision, Recall and F1-Score...")
+print(metrics.classification_report(test_labels, test_pred, digits=4))
+
 # Testing
 test_cost, test_acc, pred, labels, test_duration = evaluate(
     features, support, y_test, test_mask, placeholders)
@@ -149,7 +163,7 @@ print("Test set results:", "cost=", "{:.5f}".format(test_cost),
 
 test_pred = []
 test_labels = []
-print(len(test_mask))
+# print(len(test_mask))
 for i in range(len(test_mask)):
     if test_mask[i]:
         test_pred.append(pred[i])
