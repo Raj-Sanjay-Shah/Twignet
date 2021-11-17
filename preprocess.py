@@ -86,6 +86,7 @@ def rem_stop_words(text):
     text = ' '.join([word for word in text.split() if word not in cachedStopWords])
     return text
 
+# Expanding won't to will not (shorter forms to longer forms) [not an exhaustive list]
 def decontracted(phrase):
     phrase = re.sub(r"won\'t", "will not", phrase)
     phrase = re.sub(r"can\'t", "can not", phrase)
