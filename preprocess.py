@@ -123,6 +123,7 @@ def clean_str(string):
     string = re.sub(r"\s{2,}", " ", string)
     return string.strip().lower()
 
+# The function below converts duplicate repeat characters in a word to single character ("yesssss" -> "yes")
 def withoutduplicates(string):
     prev=-1
     chars=[]
