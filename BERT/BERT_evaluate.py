@@ -235,6 +235,8 @@ tokenizer = AutoTokenizer.from_pretrained(model_name, do_lower_case=True)
 model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=len(label_dict), output_attentions=False, output_hidden_states=True)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
+# Copying the weights of fine-tuned model (line number 279 to line number 337)
+# Comment the below line for fine tuning
 model.load_state_dict(torch.load(model_finetuned, map_location=torch.device('cpu')))
 X_train, X_val, y_train, y_val = train_test_split(df.index.values, df.label.values, test_size=(1-ratio_of_train), random_state=17, shuffle=False)
 X_train = list(range(0, len(df)))
@@ -276,6 +278,7 @@ dataset_val = TensorDataset(input_ids_val, attention_masks_val, labels_val)
 
 dataloader_train = DataLoader(dataset_train,sampler=SequentialSampler(dataset_train), batch_size=batch_size)
 dataloader_validation = DataLoader(dataset_val, sampler=SequentialSampler(dataset_val), batch_size=batch_size)
+# The Below 
 # # ------------------------Remove this block if you don't want to train the model
 # from transformers import AdamW, get_linear_schedule_with_warmup
 # optimizer = AdamW(model.parameters(),
